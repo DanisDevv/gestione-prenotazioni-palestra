@@ -1,0 +1,21 @@
+/* Custom Styles che estendono Bootstrap */
+
+/* Card personalizzate per le prenotazioni */
+.prenotazione-card {
+    transition: transform 0.2s;
+}
+
+.prenotazione-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+}
+
+/* Bordi colorati in base allo stato */
+.border-status-IN_ATTESA { border-left: 5px solid #ffc107 !important; }
+.border-status-CONFERMATA { border-left: 5px solid #198754 !important; }
+.border-status-RIFIUTATA { border-left: 5px solid #dc3545 !important; opacity: 0.7; }
+
+/* Icone stato */
+.icon-status-IN_ATTESA { color: #ffc107; }
+.icon-status-CONFERMATA { color: #198754; }
+.icon-status-RIFIUTATA { color: #dc3545; }
