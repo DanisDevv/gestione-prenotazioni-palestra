@@ -1,21 +1,197 @@
-/* Custom Styles che estendono Bootstrap */
+/* FitLife Gym Theme - Premium Dark & Red */
 
-/* Card personalizzate per le prenotazioni */
-.prenotazione-card {
-    transition: transform 0.2s;
+body.gym-bg {
+    background-color: #f4f6f8;
+    background-image: radial-gradient(circle at 10% 20%, rgb(240, 240, 240) 0%, rgb(250, 250, 250) 90%);
+    font-family: 'Montserrat', 'Segoe UI', sans-serif;
+    padding-top: 0;
 }
 
-.prenotazione-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+/* --- NAVBAR PREMIUM --- */
+.navbar-glass {
+    background: rgba(15, 15, 15, 0.95) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(220, 53, 69, 0.5);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    padding: 15px 0;
+    transition: all 0.3s ease;
 }
 
-/* Bordi colorati in base allo stato */
-.border-status-IN_ATTESA { border-left: 5px solid #ffc107 !important; }
-.border-status-CONFERMATA { border-left: 5px solid #198754 !important; }
-.border-status-RIFIUTATA { border-left: 5px solid #dc3545 !important; opacity: 0.7; }
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+}
 
-/* Icone stato */
-.icon-status-IN_ATTESA { color: #ffc107; }
-.icon-status-CONFERMATA { color: #198754; }
-.icon-status-RIFIUTATA { color: #dc3545; }
+.nav-link {
+    position: relative;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+/* Dropdown Menu Estetici */
+.dropdown-menu-dark {
+    background-color: #111 !important;
+    border: 1px solid rgba(220, 53, 69, 0.3) !important;
+    border-radius: 12px !important;
+}
+
+.dropdown-item {
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #e74c3c !important;
+}
+
+.dropdown-divider { border-color: rgba(255,255,255,0.1); }
+
+/* --- HERO SECTION --- */
+.hero-section {
+    background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    height: 90vh; /* Più alto */
+    color: white;
+    display: flex; /* Centra contenuto */
+    align-items: center;
+}
+
+.text-stroke-red {
+    -webkit-text-stroke: 2px #e74c3c;
+    color: transparent;
+    font-style: italic;
+}
+
+/* --- STATS BAR --- */
+.tracking-wider { letter-spacing: 2px; }
+
+/* --- PRICING CARDS --- */
+.transform-scale {
+    transform: scale(1.05);
+    z-index: 10;
+    border: 1px solid #e74c3c !important;
+}
+.shadow-glow {
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+}
+
+/* --- BOTTONI --- */
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 10px 25px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    transition: all 0.3s;
+}
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6);
+}
+
+.btn-black {
+    background-color: #000;
+    color: white;
+    border: 1px solid #333;
+}
+.btn-black:hover {
+    background-color: #222;
+    color: #e74c3c;
+}
+
+/* --- CHART CONTAINERS --- */
+.chart-container {
+    position: relative;
+    height: 300px; /* Altezza fissa per evitare crescita infinita */
+    width: 100%;
+}
+
+canvas {
+    max-height: 100% !important;
+    max-width: 100% !important;
+}
+
+/* --- CARDS & STATUS --- */
+.card { border-radius: 15px; overflow: hidden; }
+.shadow-hover { transition: transform 0.3s, box-shadow 0.3s; }
+.shadow-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+/* --- INPUT FIELDS --- */
+.gym-input {
+    background-color: #fff;
+    border: 2px solid #ddd;
+    color: #000 !important;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+}
+#auth-section .gym-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff !important;
+}
+.gym-input:focus {
+    background-color: #fff;
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.2);
+    color: #000 !important;
+}
+input[type="date"].gym-input, input[type="time"].gym-input, select.gym-input { color: #000 !important; }
+select.gym-input option { background-color: #fff; color: #000; }
+
+/* --- TRAINER CARDS --- */
+.trainer-card {
+    background: white; border-radius: 20px; overflow: hidden; text-align: center;
+    transition: transform 0.3s; position: relative; border: 1px solid #eee;
+}
+.trainer-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.trainer-header {
+    background: linear-gradient(45deg, #111, #333); height: 120px; margin-bottom: 60px;
+    position: relative; clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+}
+.trainer-img {
+    width: 120px; height: 120px; border-radius: 50%; border: 5px solid white;
+    position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
+    object-fit: cover; background: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.trainer-role {
+    color: #e74c3c; font-weight: bold; text-transform: uppercase; font-size: 0.8rem;
+    letter-spacing: 2px; margin-bottom: 10px; display: block;
+}
+/* --- ANIMAZIONI TRANSIZIONI --- */
+
+/* Classe base per tutte le sezioni che devono animarsi */
+section {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px); /* Arriva leggermente dal basso */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Effetto click bottone (Ripple simulato o Scale) */
+.btn:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s;
+}

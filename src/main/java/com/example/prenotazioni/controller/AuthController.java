@@ -21,11 +21,12 @@ public class AuthController {
         if (utenteRepository.findByUsername(nuovoUtente.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username già esistente!");
         }
-        
-        // Se non specificato, il ruolo è USER di default
-        if (nuovoUtente.getRuolo() == null || nuovoUtente.getRuolo().isEmpty()) {
-            nuovoUtente.setRuolo("USER");
+        if (nuovoUtente.getEmail() != null && utenteRepository.findByEmail(nuovoUtente.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email già registrata!");
         }
+        
+        // FORZATURA: Chi si registra dal sito è SEMPRE un utente normale (Atleta)
+        nuovoUtente.setRuolo("USER");
         
         Utente salvato = utenteRepository.save(nuovoUtente);
         return ResponseEntity.ok(salvato);
@@ -33,17 +34,29 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String username = credentials.get("username");
+        String input = credentials.get("username"); // Può essere username o email
         String password = credentials.get("password");
+        
+        System.out.println("Tentativo di login con input: " + input);
 
-        Optional<Utente> utenteOpt = utenteRepository.findByUsername(username);
+        // 1. Cerca per Username
+        Optional<Utente> utenteOpt = utenteRepository.findByUsername(input);
+        
+        // 2. Se non trovato, cerca per Email
+        if (utenteOpt.isEmpty()) {
+            utenteOpt = utenteRepository.findByEmail(input);
+        }
 
         if (utenteOpt.isPresent()) {
             Utente utente = utenteOpt.get();
-            // Controllo password semplice (in produzione si userebbe bcrypt!)
+            System.out.println("Utente trovato: " + utente.getUsername());
             if (utente.getPassword().equals(password)) {
                 return ResponseEntity.ok(utente);
+            } else {
+                System.out.println("Password errata per: " + input);
             }
+        } else {
+            System.out.println("Nessun utente trovato con questo input.");
         }
         return ResponseEntity.status(401).body("Credenziali non valide");
     }

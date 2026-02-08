@@ -3,130 +3,628 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Prenotazioni</title>
+    <title>FitLife Gym - Home</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome per le icone -->
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-light">
+<body class="gym-bg">
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <!-- NAVBAR PREMIUM -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-glass fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-calendar-check me-2"></i>PrenotazioniApp</a>
+            <a class="navbar-brand text-uppercase" href="#" onclick="mostraLanding()">
+                <i class="fa-solid fa-dumbbell text-danger me-2"></i>FitLife <span class="text-danger">Gym</span>
+            </a>
             
-            <div id="user-info" class="d-none ms-auto text-white d-flex align-items-center">
-                <span id="username-display" class="me-3 fw-light"></span>
-                <button onclick="logout()" class="btn btn-outline-danger btn-sm">Esci</button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- MENU CENTRALE (Navigazione Principale) -->
+                <ul class="navbar-nav mx-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link px-3" href="#" onclick="mostraLanding()">HOME</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="#" onclick="mostraAlboTrainers()">TEAM</a></li>
+                    <!-- Link visibili solo se loggato -->
+                    <li class="nav-item private-link d-none"><a class="nav-link px-3" href="#" onclick="mostraSalaPesi()">SALA PESI</a></li>
+                    <li class="nav-item private-link d-none"><a class="nav-link px-3" href="#" onclick="caricaCorsiCliente(); loginSuccess();">CORSI</a></li>
+                </ul>
+
+                <!-- MENU PUBBLICO (Destra - Non loggato) -->
+                <ul class="navbar-nav align-items-center" id="public-menu">
+                    <li class="nav-item ms-lg-3">
+                        <button onclick="mostraLogin()" class="btn btn-outline-light me-2">ACCEDI</button>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="mostraRegister()" class="btn btn-danger shadow-lg">REGISTRATI</button>
+                    </li>
+                </ul>
+
+                <!-- MENU PRIVATO (Destra - Loggato) -->
+                <div id="user-info" class="d-none align-items-center">
+                    
+                    <!-- Dropdown Gestione (Solo Admin/Trainer) -->
+                    <div class="dropdown me-3 d-none" id="dropdown-gestione">
+                        <button class="btn btn-outline-danger dropdown-toggle btn-sm fw-bold text-uppercase px-3 rounded-pill" type="button" data-bs-toggle="dropdown">
+                            Gestione
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark shadow-lg border-0 mt-2">
+                            <li id="item-gestione-corsi"><a class="dropdown-item py-2" href="#" onclick="mostraGestioneCorsi()">
+                                <i class="fa-solid fa-calendar-days me-2 text-danger"></i> Calendario Corsi
+                            </a></li>
+                            <li id="item-gestione-utenti"><a class="dropdown-item py-2" href="#" onclick="mostraGestioneUtenti()">
+                                <i class="fa-solid fa-users-gear me-2 text-danger"></i> Staff & Atleti
+                            </a></li>
+                            <li><hr class="dropdown-divider opacity-50"></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="caricaStats()">
+                                <i class="fa-solid fa-chart-line me-2 text-danger"></i> Statistiche
+                            </a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Notifiche -->
+                    <div class="dropdown me-3">
+                        <button class="btn btn-link text-white position-relative p-0" type="button" data-bs-toggle="dropdown" onclick="caricaNotifiche()">
+                            <i class="fa-solid fa-bell fa-lg"></i>
+                            <span id="badge-notifiche" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-0 mt-2" id="lista-notifiche" style="width: 280px;">
+                            <!-- JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Profilo -->
+                    <div class="dropdown">
+                        <div class="d-flex align-items-center cursor-pointer" data-bs-toggle="dropdown" style="cursor: pointer;">
+                            <img id="nav-user-img" src="" class="rounded-circle border border-2 border-danger me-2" style="width: 38px; height: 38px; object-fit: cover;">
+                            <i class="fa-solid fa-chevron-down small text-white-50"></i>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-0 mt-2">
+                            <li><div class="dropdown-header text-uppercase fw-bold"><span id="username-display" class="text-white"></span></div></li>
+                            <li><a class="dropdown-item" href="#" onclick="apriModalProfilo()"><i class="fa-solid fa-user-pen me-2 text-danger"></i> Modifica Profilo</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="loginSuccess()"><i class="fa-solid fa-gauge-high me-2 text-danger"></i> Mia Dashboard</a></li>
+                            <li><hr class="dropdown-divider opacity-50"></li>
+                            <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()"><i class="fa-solid fa-power-off me-2"></i> ESCI</a></li>
+                        </ul>
+                    </div>
+
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="container my-5">
+    <!-- SPAZIO PER NAVBAR FISSA -->
+    <div style="margin-top: 80px;"></div>
+
+    <main>
         
-        <!-- AUTH SECTION -->
-        <section id="auth-section">
-            <div class="row justify-content-center">
-                <div class="col-md-5">
-                    <div class="card shadow-lg border-0">
-                        <div class="card-body p-5">
+        <!-- LANDING PAGE (Visibile all'avvio) -->
+        <section id="landing-section">
+            
+            <!-- 1. HERO BANNER -->
+            <div class="hero-section d-flex align-items-center position-relative">
+                <div class="container position-relative z-2">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <span class="badge bg-danger mb-3 px-3 py-2 text-uppercase fw-bold tracking-wider">New Season 2026</span>
+                            <h1 class="display-1 fw-black text-uppercase text-white lh-1 mb-4" style="font-weight: 900; letter-spacing: -2px;">
+                                Supera i tuoi <br> <span class="text-stroke-red">Limiti</span>
+                            </h1>
+                            <p class="lead text-white-50 mb-5 w-75">
+                                Non è solo una palestra. È il luogo dove la tua volontà incontra il ferro. 
+                                Unisciti alla community fitness più determinata della città.
+                            </p>
                             
-                            <!-- LOGIN -->
-                            <div id="login-box">
-                                <h3 class="text-center mb-4 text-primary">Accedi</h3>
-                                <form id="login-form">
-                                    <div class="mb-3">
-                                        <label class="form-label">Username</label>
-                                        <input type="text" id="login-user" class="form-control" placeholder="Inserisci username" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Password</label>
-                                        <input type="password" id="login-pass" class="form-control" placeholder="Inserisci password" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100 py-2">Entra</button>
-                                </form>
-                                <p class="text-center mt-3 text-muted">
-                                    Non hai un account? <a href="#" onclick="showRegister()" class="text-decoration-none">Registrati</a>
-                                </p>
+                            <!-- Bottoni OSPITE -->
+                            <div id="hero-btns-guest" class="d-flex gap-3">
+                                <button onclick="mostraRegister()" class="btn btn-danger btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hover-scale text-uppercase">
+                                    Inizia Gratis
+                                </button>
+                                <button onclick="mostraAlboTrainers()" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold rounded-pill hover-scale text-uppercase">
+                                    Scopri il Team
+                                </button>
                             </div>
 
-                            <!-- REGISTER -->
-                            <div id="register-box" class="d-none">
-                                <h3 class="text-center mb-4 text-success">Registrati</h3>
-                                <form id="register-form">
+                            <!-- Bottoni UTENTE LOGGATO (Nascosti) -->
+                            <div id="hero-btns-user" class="d-none gap-3">
+                                <button onclick="loginSuccess()" class="btn btn-danger btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hover-scale text-uppercase">
+                                    <i class="fa-solid fa-gauge-high me-2"></i> Dashboard
+                                </button>
+                                <button onclick="mostraSalaPesi()" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold rounded-pill hover-scale text-uppercase">
+                                    <i class="fa-solid fa-dumbbell me-2"></i> Sala Pesi
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- Overlay Sfumato -->
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50 z-1"></div>
+            </div>
+
+            <!-- 2. STATS BAR -->
+            <div class="bg-black py-4 border-bottom border-danger border-2">
+                <div class="container">
+                    <div class="row text-center text-white text-uppercase fw-bold">
+                        <div class="col-4 border-end border-secondary">
+                            <h2 class="text-danger mb-0 display-5">500+</h2>
+                            <small class="text-white tracking-wider">Atleti Iscritti</small>
+                        </div>
+                        <div class="col-4 border-end border-secondary">
+                            <h2 class="text-danger mb-0 display-5">20+</h2>
+                            <small class="text-white tracking-wider">Professional Trainers</small>
+                        </div>
+                        <div class="col-4">
+                            <h2 class="text-danger mb-0 display-5">24/7</h2>
+                            <small class="text-white tracking-wider">Accesso H24</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. PERCHÉ NOI (FEATURES) -->
+            <div id="servizi" class="container my-5 py-5">
+                <div class="text-center mb-5">
+                    <h5 class="text-danger fw-bold text-uppercase tracking-wider">Il nostro metodo</h5>
+                    <h2 class="display-4 fw-bold text-uppercase">Allenati da <span class="text-danger">Campione</span></h2>
+                </div>
+                
+                <div class="row g-4">
+                    <!-- Feature 1 -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-white shadow-hover p-4 text-center">
+                            <div class="icon-box bg-light text-danger rounded-circle mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="fa-solid fa-dumbbell fa-2x"></i>
+                            </div>
+                            <h4 class="fw-bold text-uppercase">Attrezzatura Pro</h4>
+                            <p class="text-muted">Solo macchinari Technogym e Panatta di ultima generazione per massimizzare ogni ripetizione.</p>
+                        </div>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-white shadow-hover p-4 text-center">
+                            <div class="icon-box bg-light text-danger rounded-circle mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="fa-solid fa-calendar-check fa-2x"></i>
+                            </div>
+                            <h4 class="fw-bold text-uppercase">Prenotazioni App</h4>
+                            <p class="text-muted">Dimentica le code. Prenota il tuo slot, il tuo corso o il tuo trainer direttamente dal telefono.</p>
+                        </div>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-white shadow-hover p-4 text-center">
+                            <div class="icon-box bg-light text-danger rounded-circle mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="fa-solid fa-people-group fa-2x"></i>
+                            </div>
+                            <h4 class="fw-bold text-uppercase">Community</h4>
+                            <p class="text-muted">Entra in un ambiente motivante. Sfide mensili, eventi e un team che ti spinge oltre.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. PREZZI (PRICING) -->
+            <div class="bg-light py-5">
+                <div class="container my-5">
+                    <div class="text-center mb-5">
+                        <h5 class="text-danger fw-bold text-uppercase tracking-wider">Piani & Tariffe</h5>
+                        <h2 class="display-4 fw-bold text-uppercase">Scegli la tua <span class="text-danger">Strada</span></h2>
+                    </div>
+
+                    <div class="row g-4 align-items-center justify-content-center">
+                        <!-- Basic -->
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm p-4 text-center">
+                                <h5 class="fw-bold text-muted text-uppercase">Start</h5>
+                                <h2 class="display-4 fw-bold my-3">€29<small class="fs-6 text-muted">/mese</small></h2>
+                                <ul class="list-unstyled text-muted mb-4 space-y-2">
+                                    <li><i class="fa-solid fa-check text-success me-2"></i> Accesso Sala Pesi</li>
+                                    <li><i class="fa-solid fa-check text-success me-2"></i> Spogliatoi & Docce</li>
+                                    <li><i class="fa-solid fa-xmark text-danger me-2"></i> Corsi Inclusi</li>
+                                </ul>
+                                <button onclick="mostraRegister()" class="btn btn-outline-dark rounded-pill w-100 fw-bold">ISCRIVITI</button>
+                            </div>
+                        </div>
+                        <!-- PRO (Evidenziato) -->
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-lg p-5 text-center bg-black text-white position-relative overflow-hidden transform-scale">
+                                <div class="position-absolute top-0 end-0 bg-danger text-white px-3 py-1 fw-bold small">BEST SELLER</div>
+                                <h5 class="fw-bold text-danger text-uppercase">Pro Fighter</h5>
+                                <h2 class="display-3 fw-bold my-3">€49<small class="fs-6 text-white-50">/mese</small></h2>
+                                <ul class="list-unstyled mb-4 space-y-2">
+                                    <li><i class="fa-solid fa-check text-danger me-2"></i> Accesso H24</li>
+                                    <li><i class="fa-solid fa-check text-danger me-2"></i> Corsi Illimitati</li>
+                                    <li><i class="fa-solid fa-check text-danger me-2"></i> Bevande Incluse</li>
+                                </ul>
+                                <button onclick="mostraRegister()" class="btn btn-danger rounded-pill w-100 fw-bold py-3 shadow-glow">ISCRIVITI ORA</button>
+                            </div>
+                        </div>
+                        <!-- Elite -->
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm p-4 text-center">
+                                <h5 class="fw-bold text-muted text-uppercase">Elite</h5>
+                                <h2 class="display-4 fw-bold my-3">€89<small class="fs-6 text-muted">/mese</small></h2>
+                                <ul class="list-unstyled text-muted mb-4 space-y-2">
+                                    <li><i class="fa-solid fa-check text-success me-2"></i> Tutto Incluso</li>
+                                    <li><i class="fa-solid fa-check text-success me-2"></i> 2h Personal Trainer</li>
+                                    <li><i class="fa-solid fa-check text-success me-2"></i> Accesso SPA</li>
+                                </ul>
+                                <button onclick="mostraRegister()" class="btn btn-outline-dark rounded-pill w-100 fw-bold">ISCRIVITI</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. TESTIMONIALS -->
+            <div class="container my-5 py-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <i class="fa-solid fa-quote-left fa-3x text-danger mb-4 opacity-25"></i>
+                        <h3 class="fst-italic fw-light mb-4">"FitLife Gym ha cambiato il mio modo di vedere l'allenamento. Non è solo fatica, è passione. L'app per prenotare è comodissima e i trainer sono i migliori in circolazione."</h3>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <img src="https://i.pravatar.cc/150?u=marco" class="rounded-circle me-3" width="60" height="60">
+                            <div class="text-start">
+                                <h6 class="fw-bold text-uppercase m-0">Marco Rossi</h6>
+                                <small class="text-muted">Atleta Pro Fighter</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. FINAL CTA BANNER -->
+            <div class="bg-danger text-white py-5 text-center">
+                <div class="container">
+                    <h2 class="fw-bold text-uppercase mb-3">Pronto a trasformarti?</h2>
+                    <p class="lead mb-4 opacity-75">Il primo ingresso è offerto da noi. Non hai più scuse.</p>
+                    <button onclick="mostraRegister()" class="btn btn-black btn-lg rounded-pill px-5 fw-bold bg-black text-white shadow-lg">ISCRIVITI GRATIS</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ALBO TRAINER SECTION -->
+        <section id="albo-trainers-section" class="d-none container my-5">
+            <div class="text-center mb-5">
+                <h2 class="text-uppercase fw-bold fst-italic display-5">I Nostri <span class="text-danger">Trainers</span></h2>
+                <p class="text-muted">Professionisti certificati pronti a guidarti verso i tuoi obiettivi.</p>
+            </div>
+            <div id="grid-trainers" class="row g-4 justify-content-center">
+                <!-- Cards generate JS -->
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- AUTH SECTION (Nascosta) -->
+            <section id="auth-section" class="d-none mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-5">
+                        <div class="card shadow-lg border-0 bg-dark text-white">
+                            <div class="card-body p-5">
+                                <div class="text-center mb-4">
+                                    <i class="fa-solid fa-dumbbell fa-3x text-danger mb-2"></i>
+                                    <h3 class="fw-bold" id="auth-title">Accedi</h3>
+                                </div>
+                                
+                                <!-- LOGIN -->
+                                <div id="login-box">
+                                    <form id="login-form">
+                                        <div class="mb-3">
+                                            <label class="small text-secondary fw-bold">USERNAME O EMAIL</label>
+                                            <input type="text" id="login-user" class="form-control gym-input" required>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="small text-secondary fw-bold">PASSWORD</label>
+                                            <input type="password" id="login-pass" class="form-control gym-input" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger w-100 fw-bold py-2">ENTRA</button>
+                                    </form>
+                                    <p class="text-center mt-3 small text-secondary">
+                                        Non hai un account? <a href="#" onclick="mostraRegister()" class="text-danger fw-bold text-decoration-none">Registrati qui</a>
+                                    </p>
+                                </div>
+
+                                <!-- REGISTER -->
+                                <div id="register-box" class="d-none">
+                                    <form id="register-form">
+                                        <div class="mb-3">
+                                            <label class="small text-secondary fw-bold">USERNAME</label>
+                                            <input type="text" id="reg-user" class="form-control gym-input" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small text-secondary fw-bold">EMAIL</label>
+                                            <input type="email" id="reg-email" class="form-control gym-input" required>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="small text-secondary fw-bold">PASSWORD</label>
+                                            <input type="password" id="reg-pass" class="form-control gym-input" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger w-100 fw-bold py-2">ISCRIVITI ORA</button>
+                                    </form>
+                                    <p class="text-center mt-3 small text-secondary">
+                                        Hai già un account? <a href="#" onclick="mostraLogin()" class="text-danger fw-bold text-decoration-none">Accedi</a>
+                                    </p>
+                                </div>
+                                <div id="auth-msg" class="text-center mt-3 fw-bold"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- APP SECTIONS (Cliente/Admin/SalaPesi) -->
+            <section id="cliente-section" class="d-none mt-4">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <!-- CALENDARIO CORSI (Sostituisce form statico) -->
+                         <div class="card shadow border-0 mb-4">
+                            <div class="card-header bg-black text-white py-3 border-bottom border-danger border-3 d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0 text-uppercase fst-italic"><i class="fa-solid fa-calendar-check text-danger me-2"></i>Corsi Disponibili</h4>
+                                <button onclick="caricaCorsiCliente()" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-rotate"></i></button>
+                            </div>
+                            <div class="card-body p-4 bg-light">
+                                <div id="lista-corsi-disponibili" class="row g-3">
+                                    <!-- Corsi caricati via JS -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h5 class="mb-3 text-uppercase fw-bold text-dark border-start border-4 border-danger ps-2">I tuoi Allenamenti</h5>
+                            <div id="lista-mie-prenotazioni" class="row g-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="admin-section" class="d-none mt-4">
+                
+                <!-- STATS DASHBOARD -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <h6 class="text-uppercase fw-bold text-muted mb-3">Prenotazioni Oggi</h6>
+                            <div class="chart-container d-flex align-items-center justify-content-center">
+                                <canvas id="chart-prenotazioni"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <h6 class="text-uppercase fw-bold text-muted mb-3">Top Corsi</h6>
+                            <div class="chart-container">
+                                <canvas id="chart-corsi"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <h6 class="text-uppercase fw-bold text-muted mb-3">Stato Iscrizioni</h6>
+                            <div class="chart-container">
+                                <canvas id="chart-stato"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm border-start border-4 border-danger">
+                    <h2 class="text-dark m-0 text-uppercase fw-bold">🏃‍♂️ Gestione Ingressi</h2>
+                    <button onclick="caricaPrenotazioni()" class="btn btn-dark"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+                </div>
+                <div id="lista-prenotazioni" class="row g-3"></div>
+            </section>
+
+            <section id="salapesi-section" class="d-none mt-4">
+                 <div class="row mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="text-uppercase fw-bold fst-italic"><i class="fa-solid fa-calendar-week text-danger me-2"></i>Tabellone Sala Pesi</h2>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <label class="fw-bold text-muted small me-2">GIORNO:</label>
+                        <input type="date" id="data-salapesi" class="form-control d-inline-block w-auto fw-bold" onchange="caricaTabellone()">
+                    </div>
+                </div>
+                <div id="grid-salapesi" class="row g-3"></div>
+            </section>
+
+            <!-- GESTIONE CORSI ADMIN -->
+            <section id="corsi-admin-section" class="d-none mt-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card shadow border-0 mb-4">
+                            <div class="card-header bg-black text-white fw-bold text-uppercase border-bottom border-danger">
+                                <i class="fa-solid fa-plus-circle text-danger me-2"></i>Crea Nuova Lezione
+                            </div>
+                            <div class="card-body bg-light">
+                                <form id="form-crea-lezione">
                                     <div class="mb-3">
-                                        <label class="form-label">Username</label>
-                                        <input type="text" id="reg-user" class="form-control" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Password</label>
-                                        <input type="password" id="reg-pass" class="form-control" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Sei un:</label>
-                                        <select id="reg-role" class="form-select">
-                                            <option value="USER">Cliente (Voglio prenotare)</option>
-                                            <option value="ADMIN">Proprietario (Gestisco attività)</option>
+                                        <label class="fw-bold small">CORSO</label>
+                                        <select id="corso-materia" class="form-select gym-input text-white">
+                                            <option value="Yoga">🧘‍♀️ Yoga</option>
+                                            <option value="Pilates">🤸‍♀️ Pilates</option>
+                                            <option value="Functional">🏋️‍♂️ Functional Training</option>
+                                            <option value="Zumba">💃 Zumba</option>
+                                            <option value="Boxe">🥊 Boxe</option>
                                         </select>
                                     </div>
-                                    <button type="submit" class="btn btn-success w-100 py-2">Crea Account</button>
+                                    <div class="mb-3">
+                                        <label class="fw-bold small">DATA</label>
+                                        <input type="date" id="corso-data" class="form-control gym-input text-white" required>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="fw-bold small">INIZIO</label>
+                                            <input type="time" id="corso-ora" class="form-control gym-input text-white" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="fw-bold small">FINE</label>
+                                            <input type="time" id="corso-ora-fine" class="form-control gym-input text-white" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold small">MAX PARTECIPANTI</label>
+                                        <input type="number" id="corso-max-posti" class="form-control gym-input text-white" value="20" min="1" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100 fw-bold text-uppercase">PUBBLICA LEZIONE</button>
                                 </form>
-                                <p class="text-center mt-3 text-muted">
-                                    Hai già un account? <a href="#" onclick="showLogin()" class="text-decoration-none">Accedi</a>
-                                </p>
                             </div>
-
-                            <div id="auth-msg" class="text-center mt-3 text-danger fw-bold"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <h4 class="text-uppercase fw-bold mb-3 border-start border-4 border-danger ps-2">Lezioni in Programma</h4>
+                        <div id="lista-lezioni-admin" class="row g-3">
+                            <!-- Lista generata JS -->
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- CLIENTE SECTION -->
-        <section id="cliente-section" class="d-none">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card shadow border-0">
-                        <div class="card-header bg-primary text-white text-center py-3">
-                            <h4 class="mb-0">📅 Prenota Appuntamento</h4>
-                        </div>
-                        <div class="card-body p-4">
-                            <form id="booking-form">
-                                <div class="mb-3">
-                                    <label class="form-label">Nome Prenotazione</label>
-                                    <input type="text" id="nome" class="form-control bg-light" readonly>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label">Scegli Data e Ora</label>
-                                    <input type="datetime-local" id="data" class="form-control" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm">Conferma Prenotazione</button>
-                            </form>
-                            <div id="msg-cliente" class="mt-3 text-center fw-bold"></div>
+            <!-- GESTIONE UTENTI (SOLO ADMIN) -->
+            <section id="gestione-utenti-section" class="d-none mt-4">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-black text-white py-3 border-bottom border-danger">
+                        <h4 class="mb-0 text-uppercase fw-bold"><i class="fa-solid fa-users-gear text-danger me-2"></i>Gestione Staff & Atleti</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Utente</th>
+                                        <th>Email</th>
+                                        <th>Ruolo Attuale</th>
+                                        <th>Azione</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabella-utenti">
+                                    <!-- Righe generate via JS -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- ADMIN SECTION -->
-        <section id="admin-section" class="d-none">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-dark"><i class="fa-solid fa-lock text-warning me-2"></i>Pannello di Controllo</h2>
-                <button onclick="caricaPrenotazioni()" class="btn btn-outline-secondary"><i class="fa-solid fa-rotate me-1"></i> Aggiorna</button>
-            </div>
-            
-            <div id="lista-prenotazioni" class="row g-3">
-                <!-- Le card verranno inserite qui -->
-            </div>
-        </section>
-
+        </div>
     </main>
+    
+    <!-- FOOTER -->
+    <footer class="bg-black text-white py-4 mt-5 text-center small border-top border-danger border-3">
+        <p class="mb-1">&copy; 2026 <strong>FitLife Gym</strong>. Tutti i diritti riservati.</p>
+        <p class="text-muted">Allenati con passione. Vivi con forza.</p>
+    </footer>
 
-    <!-- Bootstrap JS Bundle -->
+    <!-- MODALE LISTA -->
+    <div class="modal fade" id="modalIscritti" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-black text-white border-bottom border-danger">
+                    <h5 class="modal-title fst-italic text-uppercase"><i class="fa-solid fa-users text-danger me-2"></i>Atleti in Sala</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul id="lista-nomi-modal" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE IL MIO PROFILO -->
+    <div class="modal fade" id="modalProfilo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white border-bottom border-danger">
+                    <h5 class="modal-title text-uppercase"><i class="fa-solid fa-user-gear text-danger me-2"></i>Il Mio Profilo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-profilo">
+                        <div class="text-center mb-3">
+                            <img id="preview-profilo" src="" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold small">FOTO PROFILO</label>
+                            <input type="file" id="file-foto-profilo" class="form-control gym-input text-white" accept="image/*">
+                            <div class="text-center my-2 text-muted small">- OPPURE -</div>
+                            <input type="text" id="input-foto-profilo" class="form-control gym-input text-white" placeholder="Incolla URL immagine..." oninput="document.getElementById('preview-profilo').src = this.value">
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 fw-bold text-uppercase">SALVA MODIFICHE</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE EDIT TRAINER (SOLO ADMIN) -->
+    <div class="modal fade" id="modalEditTrainer" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-black text-white border-bottom border-danger">
+                    <h5 class="modal-title text-uppercase"><i class="fa-solid fa-pen-to-square text-danger me-2"></i>Modifica Trainer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <form id="form-edit-trainer">
+                        <input type="hidden" id="edit-trainer-username">
+                        <div class="mb-3">
+                            <label class="fw-bold small">FOTO</label>
+                            <input type="file" id="file-edit-trainer-foto" class="form-control gym-input text-white" accept="image/*">
+                            <div class="text-center my-1 small">- oppure URL -</div>
+                            <input type="text" id="edit-trainer-foto" class="form-control gym-input text-white">
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold small">BIO / DESCRIZIONE</label>
+                            <textarea id="edit-trainer-bio" class="form-control gym-input text-white" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 fw-bold text-uppercase">AGGIORNA SCHEDA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE ALERT GENERICO -->
+    <div class="modal fade" id="modalCustomAlert" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg text-center">
+                <div class="modal-header border-0 justify-content-center pb-0">
+                    <i class="fa-solid fa-bell fa-3x text-danger mb-2"></i>
+                </div>
+                <div class="modal-body pt-0">
+                    <h4 class="fw-bold text-uppercase mb-2" id="alert-title">Attenzione</h4>
+                    <p class="text-muted" id="alert-message">Messaggio...</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" data-bs-dismiss="modal">OK, CAPITO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CONFIRM GENERICO -->
+    <div class="modal fade" id="modalCustomConfirm" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg text-center">
+                <div class="modal-body p-4">
+                    <i class="fa-solid fa-circle-question fa-3x text-warning mb-3"></i>
+                    <h4 class="fw-bold text-uppercase mb-2" id="confirm-title">Sei sicuro?</h4>
+                    <p class="text-muted mb-4" id="confirm-message">Procedere con l'operazione?</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal" id="btn-confirm-no">ANNULLA</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btn-confirm-yes">CONFERMA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
