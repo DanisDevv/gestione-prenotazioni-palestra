@@ -23,11 +23,14 @@ function showConfirm(titolo, messaggio, onConfirm) {
     new bootstrap.Modal(document.getElementById('modalCustomConfirm')).show();
 }
 
-// --- NAVIGAZIONE GENERALE ---
+// --- NAVIGAZIONE ---
 
 function nascondiTutto() {
     const sezioni = ['landing-section', 'auth-section', 'cliente-section', 'admin-section', 'salapesi-section', 'corsi-admin-section', 'albo-trainers-section', 'gestione-utenti-section'];
-    sezioni.forEach(id => document.getElementById(id).classList.add('d-none'));
+    sezioni.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('d-none');
+    });
 }
 
 function mostraLanding() {
@@ -36,14 +39,12 @@ function mostraLanding() {
     
     // Gestione Bottoni Hero e Navbar
     if (currentUser) {
-        // LOGGATO
         document.getElementById('public-menu').classList.add('d-none');
         document.getElementById('user-info').classList.remove('d-none');
         document.getElementById('hero-btns-guest').classList.add('d-none');
         document.getElementById('hero-btns-user').classList.remove('d-none');
-        document.getElementById('hero-btns-user').classList.add('d-flex'); // Assicura flex layout
+        document.getElementById('hero-btns-user').classList.add('d-flex');
     } else {
-        // OSPITE
         document.getElementById('public-menu').classList.remove('d-none');
         document.getElementById('user-info').classList.add('d-none');
         document.getElementById('hero-btns-guest').classList.remove('d-none');
@@ -82,18 +83,12 @@ function verificaAccessoCorsi() {
 
 let currentUser = null;
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
+async function handleLogin(e) {
     e.preventDefault();
     const user = document.getElementById('login-user').value;
     const pass = document.getElementById('login-pass').value;
-    
     try {
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, password: pass })
-        });
-        
+        const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass }) });
         if (res.ok) {
             currentUser = await res.json();
             loginSuccess();
@@ -102,76 +97,72 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             document.getElementById('auth-msg').className = "text-center mt-3 fw-bold text-danger";       
         }
     } catch (err) { console.error(err); }
-});
+}
 
-document.getElementById('register-form').addEventListener('submit', async (e) => {
+async function handleRegister(e) {
     e.preventDefault();
     const user = document.getElementById('reg-user').value;
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-pass').value;
-    
     try {
-        const res = await fetch('/api/auth/registrati', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, email: email, password: pass })
-        });
-        
-        if (res.ok) {
-            showAlert("Benvenuto!", "Registrazione completata! Ora puoi accedere.");
-            mostraLogin();
-        } else {
-            const txt = await res.text();
-            showAlert("Attenzione", "Errore iscrizione: " + txt);
-        }
+        const res = await fetch('/api/auth/registrati', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, email: email, password: pass }) });
+        if (res.ok) { showAlert("Benvenuto!", "Registrazione completata!"); mostraLogin(); } 
+        else showAlert("Attenzione", "Errore: " + await res.text());
     } catch (err) { console.error(err); }
-});
+}
 
 function loginSuccess() {
+    console.log("Login Success per:", currentUser.username, "Ruolo:", currentUser.ruolo);
     localStorage.setItem('fitlife_user', JSON.stringify(currentUser));
     nascondiTutto();
     
-    // UI Utente & Avatar
     const userImg = currentUser.fotoUrl || `https://i.pravatar.cc/150?u=${currentUser.username}`;
-    document.getElementById('nav-user-img').src = userImg;
-    document.getElementById('username-display').innerText = currentUser.username;
+    const imgEl = document.getElementById('nav-user-img');
+    const nameEl = document.getElementById('username-display');
+    if(imgEl) imgEl.src = userImg;
+    if(nameEl) nameEl.innerText = currentUser.username;
     
-    // Cambia Visibilità Navbar
     document.getElementById('public-menu').classList.add('d-none');
     document.getElementById('user-info').classList.remove('d-none');
     document.getElementById('user-info').classList.add('d-flex');
 
-    // Mostra link privati al centro
     document.querySelectorAll('.private-link').forEach(el => el.classList.remove('d-none'));
 
-    // Reset Menu Gestione
     const dropGestione = document.getElementById('dropdown-gestione');
     const itemUtenti = document.getElementById('item-gestione-utenti');
     const itemCorsi = document.getElementById('item-gestione-corsi');
     
-    dropGestione.classList.add('d-none');
-    itemUtenti.classList.add('d-none');
-    itemCorsi.classList.add('d-none');
+    if(dropGestione) dropGestione.classList.add('d-none');
+    if(itemUtenti) itemUtenti.classList.add('d-none');
+    if(itemCorsi) itemCorsi.classList.add('d-none');
 
-    // Routing & Permessi
+    // Routing
     if (currentUser.ruolo === 'ADMIN') {
+        console.log("-> Admin View");
         document.getElementById('admin-section').classList.remove('d-none');
-        dropGestione.classList.remove('d-none');
-        itemUtenti.classList.remove('d-none');
-        itemCorsi.classList.remove('d-none');
+        if(dropGestione) dropGestione.classList.remove('d-none');
+        if(itemUtenti) itemUtenti.classList.remove('d-none');
+        if(itemCorsi) itemCorsi.classList.remove('d-none');
         caricaPrenotazioni();
         caricaStats();
     } 
     else if (currentUser.ruolo === 'TRAINER') {
+        console.log("-> Trainer View");
         document.getElementById('admin-section').classList.remove('d-none');
-        dropGestione.classList.remove('d-none');
-        itemCorsi.classList.remove('d-none'); // Solo corsi
-        document.querySelector('#admin-section .row.mb-4').classList.add('d-none'); 
+        if(dropGestione) dropGestione.classList.remove('d-none');
+        if(itemCorsi) itemCorsi.classList.remove('d-none');
+        const rowStats = document.querySelector('#admin-section .row.mb-4');
+        if(rowStats) rowStats.classList.add('d-none'); 
         caricaPrenotazioni(true);
     } 
     else {
-        document.getElementById('cliente-section').classList.remove('d-none');
-        document.getElementById('nome').value = currentUser.username;
+        console.log("-> Cliente View");
+        const clientSection = document.getElementById('cliente-section');
+        if(clientSection) clientSection.classList.remove('d-none');
+        
+        const nomeInput = document.getElementById('nome');
+        if(nomeInput) nomeInput.value = currentUser.username;
+        
         impostaDataDefault();
         caricaCorsiCliente();
         caricaMiePrenotazioni();
@@ -180,6 +171,8 @@ function loginSuccess() {
 
 function impostaDataDefault() {
     const inputData = document.getElementById('data');
+    if (!inputData) return; // Protezione se l'elemento non c'è
+    
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     const str = now.toISOString().slice(0, 16);
@@ -209,7 +202,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
-document.getElementById('form-profilo').addEventListener('submit', async (e) => {
+async function handleProfilo(e) {
     e.preventDefault();
     const fileInput = document.getElementById('file-foto-profilo');
     const urlInput = document.getElementById('input-foto-profilo');
@@ -234,7 +227,7 @@ document.getElementById('form-profilo').addEventListener('submit', async (e) => 
             location.reload();
         } else showAlert("Errore", "Impossibile aggiornare.");
     } catch(e) { showAlert("Errore", "Problema di connessione."); }
-});
+}
 
 // --- SALA PESI ---
 
@@ -407,7 +400,7 @@ async function mostraIscrittiLezione(id) {
     } catch(e) { showAlert("Errore", "Recupero iscritti fallito."); }
 }
 
-document.getElementById('form-crea-lezione').addEventListener('submit', async (e) => {
+async function handleCreaLezione(e) {
     e.preventDefault();
     const payload = {
         materia: document.getElementById('corso-materia').value,
@@ -421,7 +414,7 @@ document.getElementById('form-crea-lezione').addEventListener('submit', async (e
         const res = await fetch('/api/lezioni', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
         if(res.ok) { showAlert("Fatto", "Lezione creata!"); caricaCorsiAdmin(); } else showAlert("Errore", "Fallito.");
     } catch(e) { showAlert("Errore", "Rete."); }
-});
+}
 
 async function eliminaLezione(id) {
     showConfirm("Eliminare?", "Cancellerai anche le prenotazioni.", async () => {
@@ -523,7 +516,7 @@ function apriModalEditTrainer(username, foto, bio) {
     new bootstrap.Modal(document.getElementById('modalEditTrainer')).show();
 }
 
-document.getElementById('form-edit-trainer').addEventListener('submit', async (e) => {
+async function handleEditTrainer(e) {
     e.preventDefault();
     const target = document.getElementById('edit-trainer-username').value;
     const urlInput = document.getElementById('edit-trainer-foto').value;
@@ -544,7 +537,7 @@ document.getElementById('form-edit-trainer').addEventListener('submit', async (e
         if (res.ok) { showAlert("Fatto", "Aggiornato!"); location.reload(); } 
         else showAlert("Errore", "Fallito.");
     } catch(e) { showAlert("Errore", "Rete"); }
-});
+}
 
 // --- GESTIONE UTENTI ADMIN ---
 
@@ -644,11 +637,7 @@ async function caricaNotifiche() {
     } catch(e) {}
 }
 
-setInterval(() => { if(currentUser) caricaNotifiche(); }, 60000);
-
-// --- PRENOTAZIONI CLASSICHE ---
-
-document.getElementById('booking-form').addEventListener('submit', async (e) => {
+async function handleBooking(e) {
     e.preventDefault();
     const nome = document.getElementById('nome').value;
     const dataOra = document.getElementById('data').value;
@@ -669,7 +658,7 @@ document.getElementById('booking-form').addEventListener('submit', async (e) => 
             msgDiv.className = "mt-3 text-center fw-bold text-danger";
         }
     } catch (err) { msgDiv.textContent = "Errore"; }
-});
+}
 
 async function caricaMiePrenotazioni() {
     const listaDiv = document.getElementById('lista-mie-prenotazioni');
@@ -729,11 +718,36 @@ async function gestisciPrenotazione(id, accetta) {
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Ripristino
     const savedUser = localStorage.getItem('fitlife_user');
     if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        loginSuccess();
+        try {
+            currentUser = JSON.parse(savedUser);
+            if (currentUser && currentUser.username) {
+                console.log("Ripristino:", currentUser.username);
+                loginSuccess();
+            } else { throw new Error("Invalido"); }
+        } catch (e) {
+            localStorage.removeItem('fitlife_user');
+            currentUser = null;
+            mostraLanding();
+        }
     } else {
         mostraLanding();
     }
+
+    // 2. Event Listeners Sicuri
+    const forms = [
+        { id: 'login-form', handler: handleLogin },
+        { id: 'register-form', handler: handleRegister },
+        { id: 'form-profilo', handler: handleProfilo },
+        { id: 'form-crea-lezione', handler: handleCreaLezione },
+        { id: 'form-edit-trainer', handler: handleEditTrainer },
+        { id: 'booking-form', handler: handleBooking }
+    ];
+
+    forms.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el) el.addEventListener('submit', f.handler);
+    });
 });
